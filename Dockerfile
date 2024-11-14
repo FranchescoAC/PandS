@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Instala las dependencias
-RUN pip install -r requirements.txt
+RUN pip install -r requeriments.txt
 
 # Expone el puerto 5000
 EXPOSE 6000
