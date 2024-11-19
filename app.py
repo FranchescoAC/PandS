@@ -128,6 +128,8 @@ resultado_html = """
 <body style="text-align: center;">
     <h1>🎉 ¡Aquí está tu resultado divertido! 🎉</h1>
     <p>{{ resultado }}</p>
+     <p>¿Listo para más diversión? 🎈</p>
+            <button onclick="location.href='/'">Volver al inicio</button>
 </body>
 </html>
 """
@@ -202,8 +204,11 @@ match_resultado_html = """
         .confianza { color: #f39c12; }
     </style>
 </head>
+
 <body style="text-align: center;">
     <h1>{{ mensaje }}</h1>
+     <p>{{ telefono_form }}</p>
+        
 </body>
 </html>
 """
@@ -244,7 +249,7 @@ def encuesta_carrera():
     elif universidad == "uce" and carrera == "odontologia":
         resultado = "¿Quieres decir que eres odontonena de la UCE?"
     elif carrera == "otro":
-        resultado = "Eres diferente a las demás"
+        resultado = "¿Eres muy joven para la Carrera?"
     else:
         resultado = "¡Eres muy joven para la Carrera!"
     
@@ -420,15 +425,151 @@ def encuesta_resultado():
 @app.route('/encuesta/match-resultado', methods=['POST'])
 def match_resultado():
     puntuacion = int(request.form.get('puntuacion'))
-    
+    telefono_form = ""  # Inicializa el formulario vacío
+
+    # Determinar mensaje según la puntuación
     if puntuacion <= 5:
         mensaje = "¡Mal! 👎"
+        color = "#ff5e5b"  # Rojo para puntajes bajos
     elif 6 <= puntuacion <= 8:
-        mensaje = "Wow, nada mal. Reclama un shot con confianza."
+        mensaje = "Wow, nada mal. Reclama un shot con confianza. 🥃"
+        color = "#8ac926"  # Amarillo para puntajes medios
     elif puntuacion >= 9:
-        mensaje = "¡Beso o shot! ¿Qué eliges?"
-    
-    return render_template_string(match_resultado_html, mensaje=mensaje)
+        mensaje = "¡Beso o shot!💋🥃 ¿Qué eliges? "
+        color = "#8ac926"  # Verde para puntajes altos
+        # Mostrar formulario solo si la puntuación es 9 o mayor
+        telefono_form = """
+        <form action="/guardar_telefono" method="post" style="margin-top: 20px;">
+            <label for="telefono" style="font-size: 1.2em;">¿Me das tu nombre y número?:</label><br>
+            <input type="text" id="telefono" name="telefono" placeholder="Ej. 0987654321" required style="padding: 10px; font-size: 1em; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; width: 80%;">
+            <br>
+            <button type="submit" style="background-color: #ff5e5b; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer; transition: background-color 0.3s;">
+                Guardar
+            </button>
+        </form>
+        """
+
+    # HTML para mostrar el resultado
+    match_resultado_html = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Resultado del Match</title>
+        <style>
+            body {{
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #fad0c4, #ffd1ba);
+                color: #333;
+                text-align: center;
+                padding: 20px;
+            }}
+            h1 {{
+                font-size: 2.5em;
+                color: {color};
+            }}
+            p {{
+                font-size: 1.5em;
+                margin: 20px 0;
+            }}
+            form {{
+                background: #fff;
+                border: 1px solid #ddd;
+                padding: 20px;
+                border-radius: 10px;
+                display: inline-block;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }}
+            button:hover {{
+                background-color: #e04b4a;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>{mensaje}</h1>
+       
+        {telefono_form}
+    </body>
+    </html>
+    """
+    return render_template_string(match_resultado_html)
+
+
+
+@app.route('/guardar_telefono', methods=['POST'])
+def guardar_telefono():
+    telefono = request.form.get('telefono')
+    with open("telefonos.txt", "a") as archivo:
+        archivo.write(f"{telefono}\n")
+    return """
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Teléfono Guardado</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+                color: #333;
+                text-align: center;
+                padding: 20px;
+            }
+            h1 {
+                color: #ff5e5b;
+                font-size: 2.5em;
+            }
+            p {
+                font-size: 1.2em;
+                color: #555;
+            }
+            .confetti {
+                font-size: 5em;
+                margin: 10px;
+                animation: bounce 1.5s infinite;
+            }
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-30px);
+                }
+                60% {
+                    transform: translateY(-15px);
+                }
+            }
+            button {
+                background-color: #ff5e5b;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 1em;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            button:hover {
+                background-color: #ff3d3a;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <div class="confetti">🎉</div>
+            <h1>¡Gracias por compartirme tu número! 📞</h1>
+            <p>Me pondré en contacto. 😉</p>
+            <p>¿Listo para más diversión? 🎈</p>
+            <button onclick="location.href='/'">Volver al inicio</button>
+        </div>
+    </body>
+    </html>
+    """
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
